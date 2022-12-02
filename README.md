@@ -1,7 +1,7 @@
 # Serve
 
 ```bash
-clojure -M:serve :port 1337 :dir public
+clojure -M:serve :port 1337 :dir .
 ```
 
 # nREPL
