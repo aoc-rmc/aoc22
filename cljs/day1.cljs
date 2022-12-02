@@ -6,28 +6,42 @@
 
 (def data (r/atom nil))
 
-(helper/fetch data "inputs/day1")
+(helper/fetch data "data/day1")
 
+(def answer (r/atom nil))
 
 (defn parts
   [elves]
-  [:div.row.p-3
+  [:div.row
    [:div.col
-    [:button.btn.btn-success {:type "button" :data-bs-toggle "collapse" :data-bs-target "#multiCollapseExample1" :aria-expanded "false" :aria-controls "multiCollapseExample2"} "Part 1"]]
+    [:button.btn.btn-success
+     {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part1"
+      :aria-expanded "false" :aria-controls "part1"
+      :on-click      (fn [] (reset! answer (set [(last (sort elves))])))}
+     "Part 1"]]
    [:div.col
-    [:button.btn.btn-danger {:type "button" :data-bs-toggle "collapse" :data-bs-target "#multiCollapseExample2" :aria-expanded "false" :aria-controls "multiCollapseExample2"} "Part 2"]]
-   [:div.row
+    [:button.btn.btn-danger
+     {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part2"
+      :aria-expanded "false" :aria-controls "part2"
+      :on-click      (fn [] (reset! answer (set (take 3 (reverse (sort elves))))))}
+     "Part 2"]]
+   [:div.row.p-2
     [:div.col
-     [:div#multiCollapseExample1.collapse.multi-collapse
-      [:div.card.card-body
-       [:p "Q. Find the amount of calories held by the elf carrying the most calories"]
-       [:p "A. " (last (sort elves))]]]]
+     [:div#part1.collapse.multi-collapse
+      [:div.card
+       [:div.card-body
+        [:h5.card-title "Q. Find the amount of calories held by the elf carrying the most calories"]
+        [:br]
+        [:p "A. " (last (sort elves))]]]]]
     [:div.col
-     [:div#multiCollapseExample2.collapse.multi-collapse
-      [:div.card.card-body
-       [:p "Find the amount of calories held by the three elves carrying the most calories"]
-       [:p "The three: " (interpose " " (take 3 (reverse (sort elves))))]
-       [:p "A. " (reduce + (take 3 (reverse (sort elves))))]]]]]])
+     [:div#part2.collapse.multi-collapse
+      [:div.card
+       [:div.card-body
+        [:h5.card-title "Q. Find the amount of calories held by the three elves carrying the most calories"]
+        [:br]
+        [:p "The three: " (interpose " " (take 3 (reverse (sort elves))))]
+        [:br]
+        [:p "A. " (reduce + (take 3 (reverse (sort elves))))]]]]]]])
 
 (defn elf-table
   [elves]
@@ -35,24 +49,34 @@
     [:table.table-sm
      [:tbody
       (map (fn [row]
-             (into [:tr]
-                   (map (fn [elf]
-                          [:td {:style {:font-size 8}} elf])
-                        row)))
+             (let [answer-in-row? (when @answer (some @answer row))
+                   font-size      (if answer-in-row? 12 9)]
+               (into [:tr]
+                     (map (fn [elf-calories]
+                            [:td {:style {:font-size font-size
+                                          :color     (cond
+                                                       (and answer-in-row?
+                                                            (not (contains? @answer elf-calories))) "lightgray"
+                                                       (contains? @answer elf-calories) "green"
+                                                       :else "black")}} elf-calories])
+                          row))))
            elf-rows)]]))
 
 (defn content
   [day#]
   (let [elves (->> @data
                    str/split-lines
-                   (map js/parseInt)
-                   (partition-by js/isNaN)
-                   (keep (fn [xs]
-                           (when-not (js/isNaN (first xs))
-                             (reduce + xs)))))]
+                   (map (fn [s]
+                          (let [n (js/parseInt s)]
+                            (when-not (js/isNaN n) n))))
+                   (partition-by nil?)
+                   (keep #(reduce + %)))]
     [:div
      [:a {:href (str "https://adventofcode.com/2022/day/" day#)}
       "Link to AOC Challenge for day " day#]
-     [:h3 "Calorie counting for " (count elves) " elves"]
+     [:br]
+     [:br]
+     [:h3 "Calorie counting for " (count elves) " elves. They each have this many calories..."]
      [elf-table elves]
+     [:br]
      [parts elves]]))
