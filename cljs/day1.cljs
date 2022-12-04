@@ -1,5 +1,6 @@
 (ns day1
   (:require
+    [clojure.edn :as edn]
     [clojure.string :as str]
     [helper]
     [reagent.core :as r]))
@@ -67,7 +68,7 @@
      [:tbody
       (map (fn [row]
              (let [answer-in-row? (when @answer (some @answer row))
-                   font-size      (if answer-in-row? 12 9)]
+                   font-size (if answer-in-row? 12 9)]
                (into [:tr]
                      (map (fn [elf-calories]
                             [:td {:style {:font-size font-size
@@ -81,11 +82,10 @@
 
 (defn content
   [day#]
+  (println :day1-content (->> @data str/split-lines (map edn/read-string)))
   (let [elves (->> @data
                    str/split-lines
-                   (map (fn [s]
-                          (let [n (js/parseInt s)]
-                            (when-not (js/isNaN n) n))))
+                   (map edn/read-string)
                    (partition-by nil?)
                    (keep #(reduce + %)))]
     [:div
