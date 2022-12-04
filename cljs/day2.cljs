@@ -14,7 +14,7 @@
 
 (def part-2-visible? (r/atom false))
 
-(def strategy (r/atom nil))
+(def strategy (r/atom :none))
 
 (defn toggle-visibility
   [state-visible? _result]
@@ -58,12 +58,13 @@
 
 (defn turn-decision-part-1
   [[_their-turn my-turn :as turn]]
-  [(score-p1 turn) (play->point my-turn)])
+  [turn [(score-p1 turn) (play->point my-turn)]])
 
 (defn part-1-answer
   [turns]
   (->> turns
-       (mapcat turn-decision-part-1)
+       (mapcat (fn [turn]
+                 (last (turn-decision-part-1 turn))))
        (reduce + 0)))
 
 (def beat
@@ -93,20 +94,22 @@
 
 (defn turn-decision-part-2
   [[their-turn action :as turn]]
-  (let [my-choice (turn-choice-part-2 turn)]
-    (condp = action
-      "X"                                                   ;lose
-      [(score-p1 [their-turn (lose-to their-turn)]) (play->point (lose-to their-turn))]
-      "Y"                                                   ;draw
-      [(score-p1 [their-turn (draw-with their-turn)]) (play->point (draw-with their-turn))]
-      "Z"                                                   ;win
-      [(score-p1 [their-turn (beat their-turn)]) (play->point (beat their-turn))])))
+  [turn
+   (condp = action
+     "X"                                                    ;lose
+     [(score-p1 [their-turn (lose-to their-turn)]) (play->point (lose-to their-turn))]
+     "Y"                                                    ;draw
+     [(score-p1 [their-turn (draw-with their-turn)]) (play->point (draw-with their-turn))]
+     "Z"                                                    ;win
+     [(score-p1 [their-turn (beat their-turn)]) (play->point (beat their-turn))])])
 
 (defn part-2-answer
   [turns]
   (->> turns
-       (mapcat turn-decision-part-2)
+       (mapcat (fn [turn]
+                 (last (turn-decision-part-2 turn))))
        (reduce + 0)))
+
 (defn answers
   [turns]
   (let [answer-1 (part-1-answer turns)                      ; 10310
@@ -118,8 +121,9 @@
         :aria-expanded "false" :aria-controls "part1"
         :on-click      (fn []
                          (toggle-visibility part-1-visible? answer-1)
-                         (when part-1-visible?
-                           (reset! strategy :part1)))}
+                         (if @part-1-visible?
+                           (reset! strategy :part1)
+                           (reset! strategy :none)))}
        "Part 1"]]
      [:div.col
       [:button.btn.btn-danger
@@ -127,8 +131,9 @@
         :aria-expanded "false" :aria-controls "part2"
         :on-click      (fn []
                          (toggle-visibility part-2-visible? answer-2)
-                         (when part-2-visible?
-                           (reset! strategy :part2)))}
+                         (if @part-2-visible?
+                           (reset! strategy :part2)
+                           (reset! strategy :none)))}
        "Part 2"]]
      [:div.row.p-2
       [:div.col
@@ -148,7 +153,7 @@
 
 (defn data-view
   [turns]
-  (let [elf-rows (partition-all 100 turns)]
+  (let [rows (partition-all 100 turns)]
     [:table.table-sm
      [:tbody
       (map-indexed
@@ -156,22 +161,31 @@
           (let [font-size (if (= row-idx 0) 8 6)]
             (into [:tr]
                   (map
-                    (fn [[their-turn my-turn :as turn]]
-                      (let [turn-choice (if (= :part2 @strategy)
-                                          (turn-choice-part-2 turn)
-                                          my-turn)
-                            decision (if (= :part2 @strategy)
-                                       (turn-decision-part-2 turn)
-                                       (turn-decision-part-1 turn))
-                            result (first decision)
+                    (fn [[turn result-vec]]
+                      (let [[their-turn my-turn] turn
+                            [result _choice-worth] result-vec
                             colour (condp = result
                                      win :green
                                      draw :gray
                                      lose :red)]
                         [:td {:style {:font-size font-size :color colour}}
-                         [:div (viz-map their-turn) (viz-map turn-choice)]]))
+                         [:div (viz-map their-turn) (viz-map my-turn)]]))
                     row))))
-        elf-rows)]]))
+        rows)]]))
+
+(defn sort-by-strategy
+  [turns game-strategy]
+  (condp = game-strategy
+    :part1 (->> turns
+                (map turn-decision-part-1)
+                (sort-by (juxt last first))
+                (reverse))
+    :part2 (->> turns
+                (map turn-decision-part-2)
+                (sort-by (juxt last first))
+                (reverse))
+    :none (->> turns
+               (map turn-decision-part-1))))
 
 (defn content
   [day#]
@@ -192,6 +206,6 @@
       [:div.col-2 {:style {:color :gray}} "Draw "]]
      [:br]
      [:h5 (str "Playing rock, paper, scissors for " (count turns) " times. The turns are...")]
-     [data-view turns]
+     [data-view (sort-by-strategy turns @strategy)]
      [:br]
      [answers turns]]))
