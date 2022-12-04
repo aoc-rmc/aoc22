@@ -10,9 +10,9 @@
 
 (def answer (r/atom nil))
 
-(def part-1-visible? (atom false))
+(def part-1-visible? (r/atom false))
 
-(def part-2-visible? (atom false))
+(def part-2-visible? (r/atom false))
 
 (defn toggle-visibility
   [state-visible? result]
@@ -24,7 +24,7 @@
       (reset! state-visible? true)
       (reset! answer result))))
 
-(defn parts
+(defn answers
   [elves]
   (let [sorted-elves (sort elves)
         answer-1 (set [(last sorted-elves)])
@@ -60,7 +60,7 @@
           [:br]
           [:p "A. " (reduce + answer-2)]]]]]]]))
 
-(defn elf-table
+(defn data-view
   [elves]
   (let [elf-rows (partition-all 35 elves)]
     [:table.table-sm
@@ -94,6 +94,6 @@
      [:br]
      [:br]
      [:h5 "Calorie counting for " (count elves) " elves. They each have this many calories..."]
-     [elf-table elves]
+     [data-view elves]
      [:br]
-     [parts elves]]))
+     [answers elves]]))

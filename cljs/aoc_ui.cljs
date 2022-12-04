@@ -1,7 +1,8 @@
 (ns aoc-ui
   (:require
     [clojure.edn :as edn]
-    [day1]                                                  ;; All solved nses must be here!!
+    [day1]
+    [day2]                                                  ;; All solved nses must be here!!
     [reagent.core :as r]
     [reagent.dom :as rdom]))
 
@@ -18,7 +19,9 @@
          (map (fn [[day solved?]]
                 (if solved?
                   [:li.nav-item {:role "presentation"}
-                   [:button#pills-home-tab.nav-link.active
+                   [(if (= 1 day)
+                      :button#pills-home-tab.nav-link.active
+                      :button#pills-home-tab.nav-link)
                     {:data-bs-toggle "pill" :data-bs-target (str "#pills-" day) :type "button"
                      :role           "tab" :aria-controls (str "pills-" day) :aria-selected "true"}
                     (str "Day " day)]]
@@ -31,12 +34,14 @@
    (into [:div#pills-tabContent.tab-content]
          (map (fn [[day solved?]]
                 (if solved?
-                  [:div.tab-pane.fade.show.active
-                   {:id (str "pills-" day) :role "tabpanel"
+                  [(if (= 1 day)
+                     :div.tab-pane.fade.show.active
+                     :div.tab-pane.fade.show)
+                   {:id              (str "pills-" day) :role "tabpanel"
                     :aria-labelledby "pills-home-tab" :tabindex "0"}
                    (eval [(symbol (str "day" day "/content")) day])]
                   [:div.tab-pane.fade
-                   {:id (str "pills-" day) :role "tabpanel"
+                   {:id              (str "pills-" day) :role "tabpanel"
                     :aria-labelledby "pills-disabled-tab" :tabindex "0"}
                    "Empty"]))
               solved-list))])
