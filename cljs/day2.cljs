@@ -2,6 +2,7 @@
   "Props to @tylerw for this answer. This page is based on that work.
   ref: https://github.com/tylerw/advent-of-code-2022/blob/master/src/aoc2022/day02.cljc"
   (:require
+    [clojure.edn :as edn]
     [clojure.string :as str]
     [helper]
     [reagent.core :as r]))

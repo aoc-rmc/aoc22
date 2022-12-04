@@ -2,13 +2,17 @@
   (:require
     [clojure.edn :as edn]
     [day1]
-    [day2]                                                  ;; All solved nses must be here!!
+    [day2]
+    [day3]
+    ;; All solved nses must be here & index.html!!
     [reagent.core :as r]
     [reagent.dom :as rdom]))
 
 (def solutions (r/atom nil))
 
 (helper/fetch solutions "data/solutions.edn")
+
+(def current-day 3)
 
 (defn days
   [solved-list]
@@ -19,7 +23,7 @@
          (map (fn [[day solved?]]
                 (if solved?
                   [:li.nav-item {:role "presentation"}
-                   [(if (= 1 day)
+                   [(if (= current-day day)
                       :button#pills-home-tab.nav-link.active
                       :button#pills-home-tab.nav-link)
                     {:data-bs-toggle "pill" :data-bs-target (str "#pills-" day) :type "button"
@@ -34,7 +38,7 @@
    (into [:div#pills-tabContent.tab-content]
          (map (fn [[day solved?]]
                 (if solved?
-                  [(if (= 1 day)
+                  [(if (= current-day day)
                      :div.tab-pane.fade.show.active
                      :div.tab-pane.fade.show)
                    {:id              (str "pills-" day) :role "tabpanel"
