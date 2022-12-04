@@ -82,7 +82,6 @@
 
 (defn content
   [day#]
-  (println :day1-content (->> @data str/split-lines (map edn/read-string)))
   (let [elves (->> @data
                    str/split-lines
                    (map edn/read-string)
