@@ -15,44 +15,40 @@
 
 (def part-2-visible? (r/atom false))
 
-(defn toggle-visibility
-  [state-visible? result]
-  (if @state-visible?
-    (do
-      (reset! state-visible? false)
-      (reset! answer nil))
-    (do
-      (reset! state-visible? true)
-      (reset! answer result))))
-
 (defn answers
   [elves]
-  (let [sorted-elves (sort elves)
-        answer-1 (set [(last sorted-elves)])
-        answer-2 (set (take 3 (reverse sorted-elves)))]
+  (let [button1-id   (str (gensym "day1-"))
+        button2-id   (str (gensym "day1-"))
+        sorted-elves (sort elves)
+        answer-1     (set [(last sorted-elves)])
+        answer-2     (set (take 3 (reverse sorted-elves)))]
     [:div.row
      [:div.col
       [:button.btn.btn-success
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part1"
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button1-id)
         :aria-expanded "false" :aria-controls "part1"
-        :on-click      #(toggle-visibility part-1-visible? answer-1)}
+        :on-click      #(if (helper/toggle-visibility part-1-visible?)
+                          (reset! answer answer-1)
+                          (reset! answer nil))}
        "Part 1"]]
      [:div.col
       [:button.btn.btn-danger
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part2"
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button2-id)
         :aria-expanded "false" :aria-controls "part2"
-        :on-click      #(toggle-visibility part-2-visible? answer-2)}
+        :on-click      #(if (helper/toggle-visibility part-2-visible?)
+                          (reset! answer answer-2)
+                          (reset! answer nil))}
        "Part 2"]]
      [:div.row.p-2
       [:div.col
-       [:div#part1.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button1-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. Find the amount of calories held by the elf carrying the most calories"]
           [:br]
           [:p "A. " (first answer-1)]]]]]
       [:div.col
-       [:div#part2.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button2-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. Find the amount of calories held by the three elves carrying the most calories"]
@@ -62,13 +58,13 @@
           [:p "A. " (reduce + answer-2)]]]]]]]))
 
 (defn data-view
-  [elves]
-  (let [elf-rows (partition-all 35 elves)]
+  [data]
+  (let [rows (partition-all 35 data)]
     [:table.table-sm
      [:tbody
       (map (fn [row]
              (let [answer-in-row? (when @answer (some @answer row))
-                   font-size (if answer-in-row? 12 9)]
+                   font-size      (if answer-in-row? 12 9)]
                (into [:tr]
                      (map (fn [elf-calories]
                             [:td {:style {:font-size font-size
@@ -78,7 +74,7 @@
                                                        (contains? @answer elf-calories) "green"
                                                        :else "black")}} elf-calories])
                           row))))
-           elf-rows)]]))
+           rows)]]))
 
 (defn content
   [day#]

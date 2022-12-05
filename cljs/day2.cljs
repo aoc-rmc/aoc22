@@ -17,12 +17,6 @@
 
 (def strategy (r/atom :none))
 
-(defn toggle-visibility
-  [state-visible? _result]
-  (if @state-visible?
-    (reset! state-visible? false)
-    (reset! state-visible? true)))
-
 (def rock [:i.bi.bi-heptagon-fill])
 (def paper [:i.bi.bi-file-earmark])
 (def scissors [:i.bi.bi-scissors])
@@ -69,9 +63,9 @@
        (reduce + 0)))
 
 (def beat
-  {"A" "Y"    ; paper(Y) beats rock(A)
-   "B" "Z"    ; scissors(Z) beats paper(B)
-   "C" "X"})  ; rock(X) beats scissors(C)
+  {"A" "Y"                                                  ; paper(Y) beats rock(A)
+   "B" "Z"                                                  ; scissors(Z) beats paper(B)
+   "C" "X"})                                                ; rock(X) beats scissors(C)
 
 (def draw-with
   {"A" "X"
@@ -79,18 +73,18 @@
    "C" "Z"})
 
 (def lose-to
-  {"A" "Z"    ; scissors(Z) loses to rock(A)
-   "B" "X"    ; rock(X) loses to paper(B)
-   "C" "Y"})  ; paper(Y) loses to scissors(C)
+  {"A" "Z"                                                  ; scissors(Z) loses to rock(A)
+   "B" "X"                                                  ; rock(X) loses to paper(B)
+   "C" "Y"})                                                ; paper(Y) loses to scissors(C)
 
 (defn turn-choice-part-2
   [[their-turn action]]
   (condp = action
-    "X" ;lose
+    "X"                                                     ;lose
     (lose-to their-turn)
-    "Y" ;draw
+    "Y"                                                     ;draw
     (draw-with their-turn)
-    "Z" ;win
+    "Z"                                                     ;win
     (beat their-turn)))
 
 (defn turn-decision-part-2
@@ -113,39 +107,37 @@
 
 (defn answers
   [turns]
-  (let [answer-1 (part-1-answer turns)                      ; 10310
-        answer-2 (part-2-answer turns)]                     ; 14859
+  (let [button1-id (str (gensym "day2-"))
+        button2-id (str (gensym "day2-"))
+        answer-1   (part-1-answer turns)                    ; 10310
+        answer-2   (part-2-answer turns)]                   ; 14859
     [:div.row
      [:div.col
       [:button.btn.btn-success
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part1"
-        :aria-expanded "false" :aria-controls "part1"
-        :on-click      (fn []
-                         (toggle-visibility part-1-visible? answer-1)
-                         (if @part-1-visible?
-                           (reset! strategy :part1)
-                           (reset! strategy :none)))}
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button1-id)
+        :aria-expanded "false" :aria-controls button1-id
+        :on-click      (fn [] (if (helper/toggle-visibility part-1-visible?)
+                                (reset! strategy :part1)
+                                (reset! strategy :none)))}
        "Part 1"]]
      [:div.col
       [:button.btn.btn-danger
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part2"
-        :aria-expanded "false" :aria-controls "part2"
-        :on-click      (fn []
-                         (toggle-visibility part-2-visible? answer-2)
-                         (if @part-2-visible?
-                           (reset! strategy :part2)
-                           (reset! strategy :none)))}
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button2-id)
+        :aria-expanded "false" :aria-controls button2-id
+        :on-click      (fn [] (if (helper/toggle-visibility part-2-visible?)
+                                (reset! strategy :part2)
+                                (reset! strategy :none)))}
        "Part 2"]]
      [:div.row.p-2
       [:div.col
-       [:div#part1.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button1-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. What would be your total score if you played with your partial understanding of the strategy guide?"]
           [:br]
           [:p "A. " answer-1]]]]]
       [:div.col
-       [:div#part2.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button2-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. What would be your total score if you played with your full understanding of the strategy guide?"]

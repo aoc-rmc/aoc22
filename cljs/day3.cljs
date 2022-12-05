@@ -14,10 +14,6 @@
 
 (def part-2-visible? (r/atom false))
 
-(defn toggle-visibility
-  [state-visible?]
-  (reset! state-visible? (not @state-visible?)))
-
 (def alphabet-lower "abcdefghijklmnopqrstuvwxyz")
 (def alphabet-upper "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -46,35 +42,33 @@
 
 (defn answers
   [inputs]
-  (let [answer-1 (part-1 inputs)
-        answer-2 (part-2 inputs)]
+  (let [button1-id (str (gensym "day3-"))
+        button2-id (str (gensym "day3-"))
+        answer-1   (part-1 inputs)
+        answer-2   (part-2 inputs)]
     [:div.row
      [:div.col
       [:button.btn.btn-success
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part1"
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button1-id)
         :aria-expanded "false" :aria-controls "part1"
-        :on-click      (fn []
-                         (reset! part-2-visible? false)
-                         (toggle-visibility part-1-visible?))}
+        :on-click      #(helper/toggle-visibility part-1-visible?)}
        "Part 1"]]
      [:div.col
       [:button.btn.btn-danger
-       {:type          "button" :data-bs-toggle "collapse" :data-bs-target "#part2"
+       {:type          "button" :data-bs-toggle "collapse" :data-bs-target (str "#" button2-id)
         :aria-expanded "false" :aria-controls "part2"
-        :on-click      (fn []
-                         (reset! part-1-visible? false)
-                         (toggle-visibility part-2-visible?))}
+        :on-click      #(helper/toggle-visibility part-2-visible?)}
        "Part 2"]]
      [:div.row.p-2
       [:div.col
-       [:div#part1.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button1-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. What is the sum of the priorities of those item types?"]
           [:br]
           [:p "A. " answer-1]]]]]
       [:div.col
-       [:div#part2.collapse.multi-collapse
+       [:div.collapse.multi-collapse {:id button2-id}
         [:div.card
          [:div.card-body
           [:h5.card-title "Q. Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?"]
