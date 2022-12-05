@@ -126,6 +126,68 @@
                     row))))
         rows)]]))
 
+(defn explainer
+  [inputs]
+  (let [input (->> inputs (filter #(< (count %) 20)) rand-nth)]
+    [:div#carouselExampleDark.carousel.carousel-dark.slide {:data-bs-ride "carousel"}
+     [:div.carousel-indicators
+      [:button.active {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide-to "0" :class "" :aria-label "Slide 1"}]
+      [:button {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide-to "1" :aria-label "Slide 2" :class ""}]
+      [:button {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide-to "2" :aria-label "Slide 3" :aria-current "true"}]
+      [:button {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide-to "3" :aria-label "Slide 4" :aria-current "true"}]]
+     [:div.carousel-inner
+      [:div.carousel-item.active {:data-bs-interval "5000"}
+       [:svg.bd-placeholder-img.bd-placeholder-img-lg.d-block.w-100
+        {:width "100%" :height "250" :xmlns "http://www.w3.org/2000/svg"
+         :role  "img" :aria-label "Placeholder: First slide" :preserveAspectRatio "xMidYMid slice" :focusable "false"}
+        [:title "Placeholder"]
+        [:rect {:width "100%" :height "100%" :fill "#f5f5f5"}]
+        [:text {:x "50%" :y "30%" :fill "#aaa" :dy ".3em"} (str (halve input))]]
+       [:div.carousel-caption.d-none.d-md-block
+        [:h4 "Take the rucksack definition and split it in half"]
+        [:p input]]]
+
+      [:div.carousel-item {:data-bs-interval "5000"}
+       [:svg.bd-placeholder-img.bd-placeholder-img-lg.d-block.w-100
+        {:width "100%" :height "250" :xmlns "http://www.w3.org/2000/svg" :role "img" :aria-label "Placeholder: Second slide" :preserveAspectRatio "xMidYMid slice" :focusable "false"}
+        [:title "Placeholder"]
+        [:rect {:width "100%" :height "100%" :fill "#eee"}]
+        [:text {:x "50%" :y "30%" :fill "#bbb" :dy ".3em"} (-> input halve common-item)]]
+       [:div.carousel-caption.d-none.d-md-block
+        [:h5 "Find the common item"]
+        [:p (str (halve input))]]]
+
+      [:div.carousel-item {:data-bs-interval "5000"}
+       [:svg.bd-placeholder-img.bd-placeholder-img-lg.d-block.w-100
+        {:width "100%" :height "250" :xmlns "http://www.w3.org/2000/svg" :role "img" :aria-label "Placeholder: Third slide" :preserveAspectRatio "xMidYMid slice" :focusable "false"}
+        [:title "Placeholder"]
+        [:rect {:width "100%" :height "100%" :fill "#e5e5e5"}]
+        [:text {:x "50%" :y "30%" :fill "#999" :dy ".3em"} (-> input halve common-item priority)]]
+       [:div.carousel-caption.d-none.d-md-block
+        [:h5 "Find the item's priority - its alphabetic code"]
+        [:p (-> input halve common-item)]]]
+
+      [:div.carousel-item {:data-bs-interval "5000"}
+       [:svg.bd-placeholder-img.bd-placeholder-img-lg.d-block.w-100
+        {:width "100%" :height "250" :xmlns "http://www.w3.org/2000/svg" :role "img" :aria-label "Placeholder: Fourth slide" :preserveAspectRatio "xMidYMid slice" :focusable "false"}
+        [:title "Placeholder"]
+        [:rect {:width "100%" :height "100%" :fill "#e5e5e5"}]
+        ;; Todo - part 1 vs part 2 explainer
+        (if @part-1-visible?
+          [:text {:x "50%" :y "30%" :fill "#999" :dy ".3em"} (str "Perform the process over all " (count inputs) " inputs and sum up = " (part-1 inputs))]
+          [:text {:x "50%" :y "30%" :fill "#999" :dy ".3em"} (str "Identify common items per three elf group and sum up = " (part-2 inputs))])]
+       [:div.carousel-caption.d-none.d-md-block
+        [:h5 "Sum them up"]
+        (if @part-1-visible?
+          [:p {:style {:font-size 8}} (str (->> (map halve inputs) (map common-item) (map priority)))]
+          [:p {:style {:font-size 11}} (str (->> (partition 3 inputs) (map common-item) (map priority)))])]]]
+     [:button.carousel-control-prev {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide "prev"}
+      [:span.carousel-control-prev-icon {:aria-hidden "true"}]
+      [:span.visually-hidden "Previous"]]
+     [:button.carousel-control-next {:type "button" :data-bs-target "#carouselExampleDark" :data-bs-slide "next"}
+      [:span.carousel-control-next-icon {:aria-hidden "true"}]
+      [:span.visually-hidden "Next"]]]))
+
 (defn content
   [day#]
   (let [inputs     (str/split-lines @data)
@@ -138,6 +200,8 @@
       "Link to AOC Challenge for day " day#]
      [:br]
      [:br]
+     (when (or @part-1-visible? @part-2-visible?)
+       [explainer inputs])
      [:br]
      [:h5 (str "Rucksack Reorganization on " (count inputs) " rucksacks. " commentary)]
      [data-view inputs]
