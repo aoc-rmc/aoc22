@@ -4,6 +4,7 @@
     [day1]
     [day2]
     [day3]
+    [day4]
     ;; All solved nses must be here & index.html!!
     [reagent.core :as r]
     [reagent.dom :as rdom]))
@@ -12,10 +13,8 @@
 
 (helper/fetch solutions "data/solutions.edn")
 
-(def current-day 3)
-
 (defn days
-  [solved-list]
+  [solved-list current-day]
   [:div
    [:h2 "Advent of Code 2022 - Made with scittle"
     [:small.text-muted " a simple way to run Clojure in your browser"]]
@@ -52,9 +51,10 @@
 
 (defn home-page
   []
-  (let [solution-data (edn/read-string @solutions)]
+  (let [solution-data (edn/read-string @solutions)
+        current-day (->> solution-data (filter #(true? (last %))) last first)]
     [:div.m-3.p-3.border-0
-     [days solution-data]]))
+     [days solution-data current-day]]))
 
 
 (rdom/render [home-page] (js/document.getElementById "app"))

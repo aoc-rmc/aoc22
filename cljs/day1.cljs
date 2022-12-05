@@ -7,8 +7,6 @@
 
 (def data (r/atom nil))
 
-(helper/fetch data "data/day1")
-
 (def answer (r/atom nil))
 
 (def part-1-visible? (r/atom false))
@@ -78,6 +76,9 @@
 
 (defn content
   [day#]
+  (when-not @data
+    (helper/fetch data (str "data/day" day#)))
+
   (let [elves (->> @data
                    str/split-lines
                    (map edn/read-string)
