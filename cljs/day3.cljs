@@ -86,14 +86,14 @@
        (map common-item)))
 
 (defn view-part-1 [input]
-  (let [common (viz-solve input (partial map halve))
+  (let [common   (viz-solve input (partial map halve))
         priority (map priority common)]
     (->> (map (fn [c p] [c p]) common priority)
          (sort-by last)
          distinct)))
 
 (defn view-part-2 [input]
-  (let [common (viz-solve input (partial partition 3))
+  (let [common   (viz-solve input (partial partition 3))
         priority (map priority common)]
     (->> (map (fn [c p] [c p]) common priority)
          (sort-by last)
@@ -110,7 +110,10 @@
      [:tbody
       (map-indexed
         (fn [row-idx row]
-          (let [font-size (if (= row-idx 0) 8 6)]
+          (let [font-size (cond
+                            (or @part-1-visible? @part-2-visible?) 14
+                            (= row-idx 0) 8
+                            :else 6)]
             (into [:tr]
                   (map
                     (fn [item]
@@ -125,7 +128,7 @@
 
 (defn content
   [day#]
-  (let [inputs (str/split-lines @data)
+  (let [inputs     (str/split-lines @data)
         commentary (cond
                      @part-1-visible? "Distinct common strings and priorities."
                      @part-2-visible? "Distinct common strings and priorities."
